@@ -1,0 +1,14 @@
+.DS_STORE
+a.out
+*.class
+*.cmd
+*.ko
+*.mod.c
+*.order
+*.symvers
+*.out
+*.mod
+*.o
+*.bin
+*.txt
+
