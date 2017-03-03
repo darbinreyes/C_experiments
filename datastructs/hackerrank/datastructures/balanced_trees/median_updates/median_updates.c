@@ -24,11 +24,21 @@ struct median_updates_node {
 #define LIST_HEAD(list_var_name) \
   struct list_head list_var_name = LIST_INIT_HEAD(list_var_name) // No semi-colon here.
 
-static inline void INIT_LIST_HEAD(struct list_head *list) { // Using "inline" qualifier allows the compiler to remove the function call overhead for callers of this function.
+static inline void INIT_LIST_HEAD(struct list_head *list) { // Notice this is a private (static) function in the LINUX header, but it is available publicly because the function is defined in the header that is included by clients. Using "inline" qualifier allows the compiler to remove the function call overhead for callers of this function.
   // Set next/prev pointers to self.
   // der-note: What if list is null.? Why doesn't linux check?
   list->next = list;
   list->prev = list;
+}
+
+// My linked list code based on above.
+
+// Append to end of given list.
+
+int my_list_append(struct list_head *head, struct list_head *new) {
+  // 1. case if list empty.
+  // 2. case not empty. // If head node does not contain data, how do we treat it?
+
 }
 
 
