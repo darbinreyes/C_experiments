@@ -31,14 +31,24 @@ static inline void INIT_LIST_HEAD(struct list_head *list) { // Notice this is a 
   list->prev = list;
 }
 
-// My linked list code based on above.
-
+// ### My linked list code based on above. ###
+int my_list_sandwhich_add(struct list_head *new, struct list_head *before, struct list_head *after) {
+  // link after then link before.
+  after->prev = new;
+  new->next = after;
+  new->prev = before;
+  before->next = new;
+  return 0;
+}
 // Append to end of given list.
 
-int my_list_append(struct list_head *head, struct list_head *new) {
+int my_list_add_tail(struct list_head *head, struct list_head *new) {
   // 1. case if list empty.
-  // 2. case not empty. // If head node does not contain data, how do we treat it?
-
+  // 2. case not empty.
+  // Q: If head node does not contain data, how do we treat it?
+  // ANS: The head just acts as a handle with after_head_node== first node with data. before_head_node=last node with data.
+  my_list_sandwhich_add(new, head->prev, head);
+  return 0;
 }
 
 
