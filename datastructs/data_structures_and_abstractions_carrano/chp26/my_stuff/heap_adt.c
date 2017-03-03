@@ -207,12 +207,13 @@ int max_heap_remove_max(int *d) {
   Generalized max_heap_reheap().
 
 **/
-int max_heap_reheap2(int *a, int len) { // Form a semi-heap by moving the last leaf to the root position.
+int max_heap_reheap2(int *a, int len, int i_root) { // Form a semi-heap by moving the last leaf to the root position.
 
-  int i_root, i_max_child, d_leaf;
+  int i_max_child, d_root;
 
   assert(a != NULL);
   assert(len > 0);
+  assert(i_root >= 0 && i_root < len);
 
   if(a == NULL || len <= 0)
     return -1;
@@ -221,12 +222,11 @@ int max_heap_reheap2(int *a, int len) { // Form a semi-heap by moving the last l
     return 0;
   }
 
-  d_leaf = a[0];
-  i_root = 0; // Sink d_leaf starting at the root.
+  d_root = a[i_root]; // Sink d_root toward larger child.
   i_max_child = max_child_index(a, i_root, len);
 
-  while(i_max_child >= 0 && i_max_child  < len && a[i_max_child] > d_leaf) {
-    a[i_root] = a[i_max_child]; // Copy larger child value up.
+  while(i_max_child >= 0 && i_max_child  < len && a[i_max_child] > d_root) {
+    a[i_root] = a[i_max_child]; // Copy larger child value up a level toward the root.
     i_root = i_max_child;
     i_max_child = max_child_index(a, i_root, len);
 
@@ -235,7 +235,7 @@ int max_heap_reheap2(int *a, int len) { // Form a semi-heap by moving the last l
     }
   }
 
-  a[i_root] = d_leaf;
+  a[i_root] = d_root;
 
   return 0;
 }
@@ -263,7 +263,7 @@ int create_max_heap(int *a, int a_len) {
   // End result is a max heap in O(n) time complexity.
 
   while(i >= 0 && i < a_len) {
-    max_heap_reheap2(&a[i], a_len - i);
+    max_heap_reheap2(a, a_len, i);
     if(i <= 0)
       break;
     else {
