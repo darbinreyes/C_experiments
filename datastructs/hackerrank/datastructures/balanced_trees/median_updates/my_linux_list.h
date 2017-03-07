@@ -15,6 +15,6 @@ struct list_head {
 
 // Declares a list head/handle.
 #define LIST_HEAD(list_var_name) \
-  struct list_head list_var_name = LIST_INIT_HEAD(list_var_name) // No semi-colon here.
+  struct list_head list_var_name = LIST_HEAD_INIT(list_var_name) // No semi-colon here.
 
 #endif
