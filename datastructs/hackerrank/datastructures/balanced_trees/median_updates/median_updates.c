@@ -63,9 +63,11 @@ void print_list(struct list_head *head) {
     // the result of the difference with point to the first byte of the container.
     // address_of_container_struct_member - (distance between start of container struct to struct member.)
     //
-    // ((char *)current_node) - &((char *)((struct median_updates_node *)0)->list)
+    // ((char *)current_node) - ( ((char *) (&((struct median_updates_node *)0)->list))) )
+    // byte_offset_of(type_name, member_name) ( ( char * ) &(((struct type_name *)0)->member_name) )
     //
-    struct median_updates_node *container = current
+    struct median_updates_node *container = ( ( char * ) current_node ) - ( ( char * ) &(((struct median_updates_node *)0)->list) );
+    printf("%d\n", container->data);
   }
 
   printf("%d\n", count);
@@ -74,7 +76,7 @@ void print_list(struct list_head *head) {
 LIST_HEAD(median_updates_list_head);
 
 int main(void) {
-  int a[] = {7, 5, 9, 3, 2, 6};
+  int a[] = {7, 5, 9, 3, 2, 13};
   int i;
   struct median_updates_node *m_node;
 
