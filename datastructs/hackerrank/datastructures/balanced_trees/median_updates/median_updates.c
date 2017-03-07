@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
+#include "my_linux_list.h"
 
 // ### My linked list code based on above. ###
 // AKA insert new in between prev and next. [[before]<->*[new]*<->[after]]
@@ -39,26 +40,23 @@ int my_list_add_tail(struct list_head *head, struct list_head *new) {
 // prints all entries in the list.
 void print_list(struct list_head *head) {
   struct list_head *current_node;
+  int count;
 
   assert(head != NULL);
 
-  if(head->next == head->prev) { // TODO: compare with linux.
-    printf("EMPTY.\n");
-    return;
+  // if(head->next == head->prev) { // TODO: compare with linux.
+  //   printf("EMPTY.\n");
+  //   return;
+  // }
+
+  for(current_node = head->next, count = 0; \
+    current_node != NULL && current_node != head; \
+    current_node = current_node->next, count++) {
+
   }
 
-  for(current_node = head->next; \
-    current_node != NULL && current_node != head; \
-    current_node = current_node->next){
-      printf("%d\n");
-    }
+  printf("%d\n", count);
 }
-
-// My copy Linux impl. of circular doubly linked list.
-
-struct list_head {
-  struct list_head *next, *prev;
-};
 
 struct median_updates_node {
   int data;
@@ -66,10 +64,7 @@ struct median_updates_node {
   struct list_head list; //  Same as adding next/prev pointers in this struct. Linux style.
 };
 
-
 LIST_HEAD(median_updates_list_head);
-
-#define ARRAY_SIZE(arr) (sizeof(arr)/sizeof(arr[0]))
 
 int main(void) {
   int a[] = {7, 5, 9, 3, 2, 6};
@@ -78,14 +73,18 @@ int main(void) {
 
   printf("Hello, World\n");
 
+  print_list(&median_updates_list_head);
+
   for(i = 0; i < ARRAY_SIZE(a); i++) {
-    m_node = malloc(sizeof(median_updates_node));
+    m_node = malloc(sizeof(*m_node));
     assert(m_node != NULL);
     m_node->data = a[i];
     m_node->data_count = 1; // Assumes a[] does not contain duplicates.
-    INIT_LIST_HEAD(m_node->list);
-    my_list_add_tail(&median_updates_list_head, m_node);
+    INIT_LIST_HEAD(&m_node->list);
+    my_list_add_tail(&median_updates_list_head, &m_node->list);
   }
+
+  print_list(&median_updates_list_head);
 
   // Print nodes.
 

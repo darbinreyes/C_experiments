@@ -5,7 +5,11 @@
 #ifndef __MY_LINUX_LIST_H__
 #define __MY_LINUX_LIST_H__
 
-// List node definition.
+#define ARRAY_SIZE(arr) (sizeof(arr)/sizeof(arr[0])) // My array size #define
+
+
+// List node definition. // My copy Linux impl. of circular doubly linked list.
+
 struct list_head {
   struct list_head *next, *prev;
 };
