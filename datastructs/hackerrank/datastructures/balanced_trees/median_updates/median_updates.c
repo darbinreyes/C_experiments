@@ -36,6 +36,11 @@ int my_list_add_tail(struct list_head *head, struct list_head *new) {
   return 0;
 }
 
+struct median_updates_node {
+  int data;
+  int data_count; // Count of instances of same data.
+  struct list_head list; //  Same as adding next/prev pointers in this struct. Linux style.
+};
 
 // prints all entries in the list.
 void print_list(struct list_head *head) {
@@ -52,17 +57,19 @@ void print_list(struct list_head *head) {
   for(current_node = head->next, count = 0; \
     current_node != NULL && current_node != head; \
     current_node = current_node->next, count++) {
-
+    //
+    // How to get container of list from list? i.e. implement container_of()
+    // GUESS: from address of list member, subtract a number of bytes such that
+    // the result of the difference with point to the first byte of the container.
+    // address_of_container_struct_member - (distance between start of container struct to struct member.)
+    //
+    // ((char *)current_node) - &((char *)((struct median_updates_node *)0)->list)
+    //
+    struct median_updates_node *container = current
   }
 
   printf("%d\n", count);
 }
-
-struct median_updates_node {
-  int data;
-  int data_count; // Count of instances of same data.
-  struct list_head list; //  Same as adding next/prev pointers in this struct. Linux style.
-};
 
 LIST_HEAD(median_updates_list_head);
 
