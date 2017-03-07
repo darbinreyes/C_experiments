@@ -1,17 +1,16 @@
 CC = cc
 PROB_NAME = hacker_rank_median_updates
-SOURCE_FILES = main_median_updates.c median_updates.c
+SOURCE_FILES = main_median_updates.c
 OUT_EXE = $(PROB_NAME).bin
 
 all:
-  $(CC) -o $(OUT_EXE) -lpthread $(SOURCE_FILES)
-  # make -C /lib/modules/$(shell uname -r)/build M=$(PWD) modules
+	$(CC) -o $(OUT_EXE)  $(SOURCE_FILES)
 
 build:
-  $(CC) -o $(OUT_EXE) -lpthread $(SOURCE_FILES)
+	$(CC) -o $(OUT_EXE) $(SOURCE_FILES)
 
 clean:
-  rm $(OUT_EXE)
-  # make -C /lib/modules/$(shell uname -r)/build M=$(PWD) clean
+	rm $(OUT_EXE)
+
 run:
-  ./$(OUT_EXE)
+	./$(OUT_EXE)
