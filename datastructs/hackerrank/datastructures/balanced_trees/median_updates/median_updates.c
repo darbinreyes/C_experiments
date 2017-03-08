@@ -42,6 +42,61 @@ struct median_updates_node {
   struct list_head list; //  Same as adding next/prev pointers in this struct. Linux style.
 };
 
+#define IS_LIST_EMPTY(list_head_ptr) ((list_head_ptr->next) == (list_head_ptr->prev)) // TRUE if list is empty.
+
+#define byte_offset_of(type_name, member_name) ( ( char * ) &(((struct type_name *)0)->member_name) )
+#define container_of(member_ptr, type_name, member_name) ((struct type_name *) ( ( (char *) member_ptr ) - byte_offset_of(type_name, member_name) ) ) // FYI: Adding "(struct type_name *)" got rid of the long vs. pointer type warning.
+
+// Add new entry to a sorted list at sorted position.
+void my_list_add_sorted_increasing(struct list_head *head, struct list_head *new) {
+  struct list_head *current_node;
+  int count;
+  struct median_updates_node *container;
+
+  assert(head != NULL);
+  assert(new != NULL);
+
+  if(IS_LIST_EMPTY(head)) {
+    // Simply add the new node and return.
+    my_list_add_head(head, new);
+    return;
+  }
+
+  // Handle Tail or head addition. No need to search in this case.
+  current_node = head->next;
+  container = container_of(current_node, median_updates_node, list);
+
+  if(container_of(new, median_updates_node, list)->data <= container->data) {
+    // Head add.
+    my_list_add_head(head, new);
+    return;
+  }
+
+  current_node = head->prev;
+  container = container_of(current_node, median_updates_node, list);
+
+  if(container_of(new, median_updates_node, list)->data >= container->data) {
+    // Tail add.
+    my_list_add_tail(head, new);
+    return;
+  }
+
+  for(current_node = head->next, count = 0; \
+    current_node != NULL && current_node != head; \
+    current_node = current_node->next, count++) {
+
+    container = container_of(current_node, median_updates_node, list);
+    //printf("%d\n", container->data);
+    if(container->data >= container_of(new, median_updates_node, list)->data) {
+      my_list_sandwhich_add(new, current_node->prev, current_node);
+      return;
+    }
+  }
+
+  //printf("count = %d.\n", count);
+  assert(0);
+}
+
 // prints all entries in the list.
 void print_list(struct list_head *head) {
   struct list_head *current_node;
@@ -66,11 +121,11 @@ void print_list(struct list_head *head) {
     // ((char *)current_node) - ( ((char *) (&((struct median_updates_node *)0)->list))) )
     // byte_offset_of(type_name, member_name) ( ( char * ) &(((struct type_name *)0)->member_name) )
     //
-    struct median_updates_node *container = ( ( char * ) current_node ) - ( ( char * ) &(((struct median_updates_node *)0)->list) );
+    struct median_updates_node *container = container_of(current_node, median_updates_node, list);//( ( char * ) current_node ) - ( ( char * ) &(((struct median_updates_node *)0)->list) );
     printf("%d\n", container->data);
   }
 
-  printf("%d\n", count);
+  printf("count = %d.\n", count);
 }
 
 LIST_HEAD(median_updates_list_head);
@@ -90,7 +145,8 @@ int main(void) {
     m_node->data = a[i];
     m_node->data_count = 1; // Assumes a[] does not contain duplicates.
     INIT_LIST_HEAD(&m_node->list);
-    my_list_add_tail(&median_updates_list_head, &m_node->list);
+    // my_list_add_tail(&median_updates_list_head, &m_node->list);
+     my_list_add_sorted_increasing(&median_updates_list_head, &m_node->list)
   }
 
   print_list(&median_updates_list_head);
