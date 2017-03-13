@@ -47,6 +47,9 @@ struct median_updates_node {
 #define byte_offset_of(type_name, member_name) ( ( char * ) &(((struct type_name *)0)->member_name) )
 #define container_of(member_ptr, type_name, member_name) ((struct type_name *) ( ( (char *) member_ptr ) - byte_offset_of(type_name, member_name) ) ) // FYI: Adding "(struct type_name *)" got rid of the long vs. pointer type warning.
 
+static int entry_count;
+static struct median_updates_node *median_ptr;
+
 // Add new entry to a sorted list at sorted position.
 void my_list_add_sorted_increasing(struct list_head *head, struct list_head *new) {
   struct list_head *current_node;
@@ -97,6 +100,34 @@ void my_list_add_sorted_increasing(struct list_head *head, struct list_head *new
   assert(0);
 }
 
+void my_list_add_sorted_increasing_and_update_median(struct list_head *head, struct list_head *new) {
+  my_list_add_sorted_increasing(head, new);
+  // assume add is always successful for now.
+  entry_count++;
+
+  if(median_ptr == NULL) {
+    assert(entry_count == 1);
+    median_ptr = container_of(new, median_updates_node, list);
+    return;
+  }
+
+  // Update median.
+  if(entry_count % 2 == 0 || entry_count <= 3) { // even count.
+    // no-op.
+    return;
+  }
+
+  // odd count.
+
+  if(container_of(new, median_updates_node, list)->data >= median_ptr->data){
+    // new node added after current median. move median up one node. // TEST THIS.
+    median_ptr = container_of(median_ptr->list.next, median_updates_node, list);
+  } else {
+    median_ptr = container_of(median_ptr->list.prev, median_updates_node, list);
+  }
+
+}
+
 // prints all entries in the list.
 void print_list(struct list_head *head) {
   struct list_head *current_node;
@@ -125,13 +156,13 @@ void print_list(struct list_head *head) {
     printf("%d\n", container->data);
   }
 
-  printf("count = %d.\n", count);
+  //printf("count = %d.\n", count);
 }
 
 LIST_HEAD(median_updates_list_head);
 
 int main(void) {
-  int a[] = {7, 5, 9, 3, 2, 13};
+  int a[] = {7, 5, 9, 3, 2, 13, 21, 6};
   int i;
   struct median_updates_node *m_node;
 
@@ -146,7 +177,16 @@ int main(void) {
     m_node->data_count = 1; // Assumes a[] does not contain duplicates.
     INIT_LIST_HEAD(&m_node->list);
     // my_list_add_tail(&median_updates_list_head, &m_node->list);
-    my_list_add_sorted_increasing(&median_updates_list_head, &m_node->list);
+    //my_list_add_sorted_increasing(&median_updates_list_head, &m_node->list);
+    my_list_add_sorted_increasing_and_update_median(&median_updates_list_head, &m_node->list);
+
+
+    print_list(&median_updates_list_head);
+    printf("entry_count = %d.\n", entry_count);
+    if(entry_count % 2 != 0)
+      printf("median = %d.\n", median_ptr->data);
+    //else // avg. for even median.
+      //printf("median = %d// ".5".\n", median_ptr->data);
   }
 
   print_list(&median_updates_list_head);
