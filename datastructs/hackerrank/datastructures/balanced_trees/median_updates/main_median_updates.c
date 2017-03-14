@@ -26,6 +26,7 @@ struct median_updates_node {
 // the current median pointer should be adjusted to point to the median_node_ptr->next.
 //
 static struct median_updates_node *median_node_ptr;
+static int node_count;
 
 // Adds an entry to the list at its sorted location.
 // Pre-condition: The input list must already be sorted.
@@ -43,6 +44,12 @@ int median_updates_list_add_sorted(int data, struct list_head *head);
 // Time Complexity: O(n)
 int median_updates_list_remove_sorted(int data, struct list_head *head);
 
+// Prints the current median value based on the rules stipulated by the problem
+// statement. if list len. odd. print current median pointer if not null. If
+// median pointer is null, print "Wrong!\n" else if list len. even print N if
+// the sum of (median->data+median->next->data) is even, otherwise if the sum
+// (median->data+median->next->data) is odd print N".5".
+void median_updates_list_print_median(void);
 
 
 LIST_HEAD(median_updates_list_head);

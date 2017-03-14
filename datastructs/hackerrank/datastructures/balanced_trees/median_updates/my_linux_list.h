@@ -5,8 +5,8 @@
 #ifndef __MY_LINUX_LIST_H__
 #define __MY_LINUX_LIST_H__
 
-#define ARRAY_SIZE(arr) (sizeof(arr)/sizeof(arr[0])) // My array size #define
-
+// TODO: Compare this to linux impl.
+#define IS_LIST_EMPTY(list_head_ptr) ( (list_head_ptr == list_head_ptr->next) && ( (list_head_ptr->next) == (list_head_ptr->prev) ) ) // TRUE if list is empty.
 
 // List node definition. // My copy Linux impl. of circular doubly linked list.
 
@@ -27,5 +27,13 @@ static inline void INIT_LIST_HEAD(struct list_head *list) { // Notice this is a 
   list->next = list;
   list->prev = list;
 }
+
+/** Misc. Definitions, not just list related. **/
+
+#define ARRAY_SIZE(arr) (sizeof(arr)/sizeof(arr[0])) // My array size #define
+
+#define byte_offset_of(type_name, member_name) ( ( char * ) &(((struct type_name *)0)->member_name) )
+#define container_of(member_ptr, type_name, member_name) ((struct type_name *) ( ( (char *) member_ptr ) - byte_offset_of(type_name, member_name) ) ) // FYI: Adding "(struct type_name *)" got rid of the long vs. pointer type warning.
+
 
 #endif

@@ -11,7 +11,7 @@
 
 // ### My linked list code based on above. ###
 // AKA insert new in between prev and next. [[before]<->*[new]*<->[after]]
-int my_list_sandwhich_add(struct list_head *new, struct list_head *before, struct list_head *after) {
+int my_list_insert(struct list_head *new, struct list_head *before, struct list_head *after) {
   // link after then link before.
   after->prev = new;
   new->next = after;
@@ -22,7 +22,7 @@ int my_list_sandwhich_add(struct list_head *new, struct list_head *before, struc
 
 // Add new in between head and head->next. [[head]<->*[new]*<->[head->next]]
 int my_list_add_head(struct list_head *head, struct list_head *new) {
-  my_list_sandwhich_add(new, head, head->next);
+  my_list_insert(new, head, head->next);
   return 0;
 }
 
@@ -32,7 +32,7 @@ int my_list_add_tail(struct list_head *head, struct list_head *new) {
   // 2. case not empty.
   // Q: If head node does not contain data, how do we treat it?
   // ANS: The head just acts as a handle with after_head_node== first node with data. before_head_node=last node with data.
-  my_list_sandwhich_add(new, head->prev, head);
+  my_list_insert(new, head->prev, head);
   return 0;
 }
 
@@ -42,22 +42,21 @@ struct median_updates_node {
   struct list_head list; //  Same as adding next/prev pointers in this struct. Linux style.
 };
 
-#define IS_LIST_EMPTY(list_head_ptr) ((list_head_ptr->next) == (list_head_ptr->prev)) // TRUE if list is empty.
-
-#define byte_offset_of(type_name, member_name) ( ( char * ) &(((struct type_name *)0)->member_name) )
-#define container_of(member_ptr, type_name, member_name) ((struct type_name *) ( ( (char *) member_ptr ) - byte_offset_of(type_name, member_name) ) ) // FYI: Adding "(struct type_name *)" got rid of the long vs. pointer type warning.
 
 static int entry_count;
 static struct median_updates_node *median_ptr;
 
+// Compares to median_updates_node's. Returns > 0 if a > b, Return == 0 if a == b. and Returns < 0 if a < b.
+typedef int (*list_node_cmp_func)(struct list_head *a_node, struct list_head *b_node);
+
 // Add new entry to a sorted list at sorted position.
-void my_list_add_sorted_increasing(struct list_head *head, struct list_head *new) {
+void my_list_add_sorted_increasing(struct list_head *head, struct list_head *new, list_node_cmp_func cmp_func) {
   struct list_head *current_node;
   int count;
-  struct median_updates_node *container;
 
   assert(head != NULL);
   assert(new != NULL);
+  assert(cmp_func != NULL);
 
   if(IS_LIST_EMPTY(head)) {
     // Simply add the new node and return.
@@ -65,43 +64,51 @@ void my_list_add_sorted_increasing(struct list_head *head, struct list_head *new
     return;
   }
 
+  //
   // Handle Tail or head addition. No need to search in this case.
-  current_node = head->next;
-  container = container_of(current_node, median_updates_node, list);
+  //
 
-  if(container_of(new, median_updates_node, list)->data <= container->data) {
-    // Head add.
+  current_node = head->next; // Get head node
+  // Check if new is smaller than the head. If yes, insert new before current head and return.
+  if(cmp_func(new, current_node) < 0) {
     my_list_add_head(head, new);
     return;
   }
 
-  current_node = head->prev;
-  container = container_of(current_node, median_updates_node, list);
-
-  if(container_of(new, median_updates_node, list)->data >= container->data) {
-    // Tail add.
+  current_node = head->prev; // Get tail node.
+  // Check if new is greater than the tail node. If yes, add new after current tail and return.
+  if(cmp_func(new, current_node) > 0) {
     my_list_add_tail(head, new);
     return;
   }
 
-  for(current_node = head->next, count = 0; \
-    current_node != NULL && current_node != head; \
-    current_node = current_node->next, count++) {
+  for(current_node = head->next; current_node != NULL && current_node != head; current_node = current_node->next) {
 
-    container = container_of(current_node, median_updates_node, list);
-    //printf("%d\n", container->data);
-    if(container->data >= container_of(new, median_updates_node, list)->data) {
-      my_list_sandwhich_add(new, current_node->prev, current_node);
-      return;
+    // Find the first node that is greater than or equal to new.
+
+    if(cmp_func(new, current_node) <= 0) {
+      break;
     }
   }
 
-  //printf("count = %d.\n", count);
-  assert(0);
+  // Insert immediately before the bigger or equal node and return.
+  my_list_insert(new, current_node->prev, current_node);
+  return;
 }
 
-void my_list_add_sorted_increasing_and_update_median(struct list_head *head, struct list_head *new) {
-  my_list_add_sorted_increasing(head, new);
+static int median_node_cmp_func(struct list_head *a, struct list_head *b) {
+  struct median_updates_node *a_node, *b_node;
+
+  assert(a != NULL && b != NULL);
+
+  a_node = container_of(a, median_updates_node, list);
+  b_node = container_of(b, median_updates_node, list);
+
+  return a_node->data - b_node->data;
+}
+
+static void my_list_add_sorted_increasing_and_update_median(struct list_head *head, struct list_head *new) {
+  my_list_add_sorted_increasing(head, new, median_node_cmp_func);
   // assume add is always successful for now.
   entry_count++;
 
@@ -159,6 +166,8 @@ void print_list(struct list_head *head) {
   //printf("count = %d.\n", count);
 }
 
+
+
 LIST_HEAD(median_updates_list_head);
 
 int main(void) {
@@ -176,8 +185,7 @@ int main(void) {
     m_node->data = a[i];
     m_node->data_count = 1; // Assumes a[] does not contain duplicates.
     INIT_LIST_HEAD(&m_node->list);
-    // my_list_add_tail(&median_updates_list_head, &m_node->list);
-    //my_list_add_sorted_increasing(&median_updates_list_head, &m_node->list);
+
     my_list_add_sorted_increasing_and_update_median(&median_updates_list_head, &m_node->list);
 
 
