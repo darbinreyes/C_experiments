@@ -186,7 +186,9 @@ int main(void) {
     m_node->data_count = 1; // Assumes a[] does not contain duplicates.
     INIT_LIST_HEAD(&m_node->list);
 
-    my_list_add_sorted_increasing_and_update_median(&median_updates_list_head, &m_node->list);
+    my_list_add_sorted_increasing(&median_updates_list_head, &m_node->list, median_node_cmp_func);
+
+    //my_list_add_sorted_increasing_and_update_median(&median_updates_list_head, &m_node->list);
 
 
     print_list(&median_updates_list_head);
