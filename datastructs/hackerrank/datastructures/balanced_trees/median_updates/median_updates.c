@@ -135,10 +135,14 @@ static void my_list_add_sorted_increasing_and_update_median(struct list_head *he
 
 }
 
+#define my_list_for_each(container_ptr, head_ptr, container_type, list_member) \
+  for(struct list_head *current_node = head_ptr->next; current_node != head_ptr && (container_ptr = container_of(current_node, container_type, list_member)); current_node = current_node->next)
+
 // prints all entries in the list.
 void print_list(struct list_head *head) {
   struct list_head *current_node;
   int count;
+  struct median_updates_node *mu_node_ptr;
 
   assert(head != NULL);
 
@@ -161,6 +165,11 @@ void print_list(struct list_head *head) {
     //
     struct median_updates_node *container = container_of(current_node, median_updates_node, list);//( ( char * ) current_node ) - ( ( char * ) &(((struct median_updates_node *)0)->list) );
     printf("%d\n", container->data);
+  }
+
+  // macro based iteration
+  my_list_for_each(mu_node_ptr, head, median_updates_node, list) {
+    printf("x %d\n", mu_node_ptr->data);
   }
 
   //printf("count = %d.\n", count);
